@@ -1,5 +1,5 @@
 class Piece
-  attr_accessor :position, :board, :color
+  attr_accessor :board, :color
 
   #change later
   def inspect
@@ -7,9 +7,18 @@ class Piece
   end
 
   def initialize(position, board, color)
-    @position = position
+    self.position = position
     @board = board
     @color = color
+  end
+
+  def position
+    @position
+  end
+
+  def position=(position)
+    @position = position
+    board[position] = self
   end
 
   def moves
@@ -112,11 +121,18 @@ class Pawn < Piece
     end
   end
 
+  def unicode
+    self.color == :white ? "\u2659" : "\u265F"
+  end
 end
 
 class Bishop < SlidingPiece
   def deltas
     SlidingPiece::DIAGONAL_DELTAS
+  end
+
+  def unicode
+    self.color == :white ? "\u2657" : "\u265D"
   end
 end
 
@@ -124,11 +140,19 @@ class Rook < SlidingPiece
   def deltas
     SlidingPiece::ORTHOGONAL_DELTAS
   end
+
+  def unicode
+    self.color == :white ? "\u2656" : "\u265C"
+  end
 end
 
 class Queen < SlidingPiece
   def deltas
     SlidingPiece::DIAGONAL_DELTAS + SlidingPiece::ORTHOGONAL_DELTAS
+  end
+
+  def unicode
+    self.color == :white ? "\u2655" : "\u265B"
   end
 end
 
@@ -138,6 +162,9 @@ class King < SteppingPiece
     [-1,  0],          [1,  0],
     [-1,  1], [0,  1], [1,  1]
   ]
+  def unicode
+    self.color == :white ? "\u2654" : "\u265A"
+  end
 end
 
 class Knight < SteppingPiece
@@ -147,4 +174,8 @@ class Knight < SteppingPiece
     [-2, -1],                   [ 2, -1],
              [-1, -2], [ 1, -2]
   ]
+
+  def unicode
+    self.color == :white ? "\u2658" : "\u265E"
+  end
 end
