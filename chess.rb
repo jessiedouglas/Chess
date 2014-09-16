@@ -1,6 +1,11 @@
 class Piece
   attr_accessor :position, :board, :color
 
+  #change later
+  def inspect
+    self.class.to_s[0]
+  end
+
   def initialize(position, board, color)
     @position = position
     @board = board
@@ -79,10 +84,39 @@ class SteppingPiece < Piece
 end
 
 class Pawn < Piece
-  def initialize(*args)
-    super(*args)
-    @type = self.class
+  def initialize(position, board, color)
+    super(position, board, color)
+    @starting_position = position
   end
+
+  def possible_moves
+    x, y = self.position
+    possibilities = [[x, white_or_black(y, 1)]]
+
+    if self.position == @starting_position
+      possibilities << [x, white_or_black(y, 2)]
+    end
+
+    diags = [
+      [x - 1, white_or_black(y, 1)],
+      [x + 1, white_or_black(y, 1)]
+    ]
+
+    possibilities += diags.select do |diag|
+      !self.board.empty?(diag)
+    end
+
+    possibilities
+  end
+
+  def white_or_black(y, dy)
+    if self.color == :white
+      y + dy
+    else
+      y - dy
+    end
+  end
+
 end
 
 class Bishop < SlidingPiece
@@ -134,7 +168,4 @@ class Knight < SteppingPiece
     super(*args)
   end
 
-  def moves
-
-  end
 end
