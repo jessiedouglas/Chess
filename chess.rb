@@ -38,13 +38,11 @@ class Piece
 end
 
 class SlidingPiece < Piece
-
-  def initialize(*args)
-    super(*args)
-  end
+  DIAGONAL_DELTAS = [[1,1], [1,-1], [-1,1], [-1,-1]]
+  ORTHOGONAL_DELTAS = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 
   def possible_moves
-    directions = self.class::DIRECTION_DELTAS
+    directions = self.deltas
     moves = []
 
     directions.each do |direction|
@@ -66,9 +64,6 @@ class SlidingPiece < Piece
 end
 
 class SteppingPiece < Piece
-  def initialize(*args)
-    super(*args)
-  end
 
   def possible_moves
     x, y = self.position
@@ -111,35 +106,29 @@ class Pawn < Piece
 
   def white_or_black(y, dy)
     if self.color == :white
-      y + dy
-    else
       y - dy
+    else
+      y + dy
     end
   end
 
 end
 
 class Bishop < SlidingPiece
-  DIRECTION_DELTAS = [[1,1], [1,-1], [-1,1], [-1,-1]]
-
-  def initialize(*args)
-    super(*args)
+  def deltas
+    SlidingPiece::DIAGONAL_DELTAS
   end
 end
 
 class Rook < SlidingPiece
-  DIRECTION_DELTAS = [[1,0], [-1,0], [0,1], [0,-1]]
-
-  def initialize(*args)
-    super(*args)
+  def deltas
+    SlidingPiece::ORTHOGONAL_DELTAS
   end
 end
 
 class Queen < SlidingPiece
-  DIRECTION_DELTAS = Rook::DIRECTION_DELTAS + Bishop::DIRECTION_DELTAS
-
-  def initialize(*args)
-    super(*args)
+  def deltas
+    SlidingPiece::DIAGONAL_DELTAS + SlidingPiece::ORTHOGONAL_DELTAS
   end
 end
 
@@ -149,11 +138,6 @@ class King < SteppingPiece
     [-1,  0],          [1,  0],
     [-1,  1], [0,  1], [1,  1]
   ]
-
-  def initialize(*args)
-    super(*args)
-  end
-
 end
 
 class Knight < SteppingPiece
@@ -163,9 +147,4 @@ class Knight < SteppingPiece
     [-2, -1],                   [ 2, -1],
              [-1, -2], [ 1, -2]
   ]
-
-  def initialize(*args)
-    super(*args)
-  end
-
 end
