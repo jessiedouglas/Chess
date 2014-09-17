@@ -113,8 +113,6 @@ class Board
     nil
   end
 
-  end
-
   def populate_board(grid = nil)
     if grid.nil?
       @grid = Array.new(8) { Array.new(8) }
