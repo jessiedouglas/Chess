@@ -1,8 +1,5 @@
 require_relative 'chess.rb'
 
-class StartPositionError < StandardError
-end
-
 class EndPositionError < StandardError
 end
 
@@ -39,7 +36,7 @@ class Board
     x.between?(0,7) && y.between?(0,7) && self[position].nil?
   end
 
-  def board_dup # build that
+  def board_dup
     duped_board = Board.new(false)
     @grid.flatten.compact.each { |piece| piece.dup(duped_board) }
     duped_board
@@ -62,29 +59,20 @@ class Board
     false
   end
 
-  def find_king(color)
-    @grid.flatten.each do |piece|
-      return piece.position if piece.class == King && piece.color == color
-    end
-
-    nil
+  def won?
+    checkmate?(:black) || checkmate?(:white)
   end
 
-  def checkmate?(color)
-    our_pieces = @grid.flatten.select do |piece|
-      next if piece.nil?
-      piece.color == color
+  def winner
+    if won?
+      checkmate?(:black) ? :white : :black
+    else
+      nil
     end
-
-    self.in_check?(color) && our_pieces.all? { |piece| piece.valid_moves.empty? }
   end
 
   def move(start, end_pos)
     piece = self[start]
-
-    if piece.nil?
-      raise StartPositionError.new
-    end
 
     unless piece.valid_moves.include?(end_pos)
       raise EndPositionError.new
@@ -97,9 +85,6 @@ class Board
 
   def move!(start, end_pos)
     piece = self[start]
-    if piece.nil?
-      raise StartPositionError.new
-    end
 
     unless piece.moves.include?(end_pos)
       raise EndPositionError.new
@@ -113,7 +98,6 @@ class Board
 
   def populate_board(grid = nil)
     if grid.nil?
-      # @grid = Array.new(8) { Array.new(8) }
       populate_new_board
     else
       @grid = grid
@@ -163,5 +147,23 @@ class Board
     lines << UNICODE_BOX[:letters]
 
     lines.join("\n")
+  end
+
+  private
+  def find_king(color)
+    @grid.flatten.each do |piece|
+      return piece.position if piece.class == King && piece.color == color
+    end
+
+    nil
+  end
+
+  def checkmate?(color)
+    our_pieces = @grid.flatten.select do |piece|
+      next if piece.nil?
+      piece.color == color
+    end
+
+    self.in_check?(color) && our_pieces.all? { |piece| piece.valid_moves.empty? }
   end
 end

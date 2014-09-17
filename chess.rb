@@ -23,14 +23,6 @@ class Piece
     possible_moves = check_color(possible_moves)
   end
 
-  def move_into_check?(position)
-    #returns true if this move puts us in check
-    board_dup = self.board.board_dup
-
-    board_dup.move!(self.position, position)
-    board_dup.in_check?(self.color)
-  end
-
   def valid_moves
     valids = self.moves.select do |move|
       !move_into_check?(move)
@@ -57,6 +49,13 @@ class Piece
     result
   end
 
+  def move_into_check?(position)
+    #returns true if this move puts us in check
+    board_dup = self.board.board_dup
+
+    board_dup.move!(self.position, position)
+    board_dup.in_check?(self.color)
+  end
 end
 
 class SlidingPiece < Piece
@@ -108,10 +107,14 @@ class Pawn < Piece
 
   def possible_moves
     x, y = self.position
-    possibilities = [[x, white_or_black(y, 1)]]
+    possibilities = []
+
+    possibility = [x, white_or_black(y, 1)]
+    possibilities << possibility if board.empty?(possibility)
 
     if self.position == @starting_position
-      possibilities << [x, white_or_black(y, 2)]
+      possibility = [x, white_or_black(y, 2)]
+      possibilities << possibility if board.empty?(possibility)
     end
 
     diags = [
@@ -126,16 +129,17 @@ class Pawn < Piece
     possibilities
   end
 
+  def unicode
+    self.color == :white ? "\u2659" : "\u265F"
+  end
+
+  private
   def white_or_black(y, dy)
     if self.color == :white
       y - dy
     else
       y + dy
     end
-  end
-
-  def unicode
-    self.color == :white ? "\u2659" : "\u265F"
   end
 end
 
