@@ -75,7 +75,7 @@ class Board
     piece = self[start]
 
     unless piece.valid_moves.include?(end_pos)
-      raise EndPositionError.new
+      raise InputError.new "You can't move there. Pick a new move (start and end)."
     end
 
     move!(start, end_pos)
@@ -87,7 +87,7 @@ class Board
     piece = self[start]
 
     unless piece.moves.include?(end_pos)
-      raise EndPositionError.new
+      raise InputError.new "You can't move there. Pick a new move (start and end)."
     end
 
     piece.position = end_pos

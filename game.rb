@@ -1,66 +1,79 @@
+require 'yaml'
 require_relative 'board'
 
-class EmptyStartError < StandardError
-end
-
-class StartPositionError < StandardError
-end
-
-class NotationError < StandardError
+class InputError < StandardError
 end
 
 class Game
   PLAYERS = {:white => "White", :black => "Black"}
 
+  attr_accessor :current_player
   attr_reader :board
 
-  def initialize(board)
-    @board = board
+  def initialize
+    @board = Board.new
     @player1 = HumanPlayer.new(:white)
     @player2 = HumanPlayer.new(:black)
     @players = [@player1, @player2]
+    @current_player = @player1
   end
 
   def play
-    current_player = @player1
 
     until self.board.won?
       system("clear")
       puts board
       puts "It is #{PLAYERS[current_player.color]}'s turn."
       puts "What is your move? (use standard chess notation)"
+      puts "(or type 'save' to save your game, 'quit' to quit)"
 
       begin
-        start_pos, end_pos = current_player.play_turn
-        piece = board[start_pos]
+        input = gets.chomp.split(",").map(&:strip)
+        case input.length
+        when 0
+          raise InputError.new
+        when 1
+          case input[0].downcase
+          when "save"
+            #current_player = opponent_of(current_player)
+            save_game
+            puts "Game saved. Enter next move."
+          when "quit"
+            #figure out
+          else
+            raise InputError.new "That is not a valid option, try again."
+          end
+        else
+          start_pos, end_pos = self.current_player.parse_input(input)
+          piece = board[start_pos]
 
-        raise EmptyStartError.new if piece.nil?
-        raise StartPositionError.new if piece.color != current_player.color
+          if piece.nil?
+            raise InputError.new "That square is empty. Pick a new move (start and end)."
+          end
 
-        board.move(start_pos, end_pos)
+          if piece.color != self.current_player.color
+            raise InputError.new "That piece is not your color. Pick a new move (start and end)."
+          end
 
-      rescue EmptyStartError
-        puts "That square is empty. Pick a new move (start and end)."
-        retry
+          board.move(start_pos, end_pos)
+        end
 
-      rescue StartPositionError
-        puts "That piece is not your color. Pick a new move (start and end)."
-        retry
-
-      rescue EndPositionError
-        puts "You can't move there. Pick a new move (start and end)."
-        retry
-
-      rescue NotationError
-        puts "Please use standard chess notation"
+      rescue InputError => e
+        puts e.message
         retry
       end
 
-      current_player = opponent_of(current_player)
+      self.current_player = opponent_of(self.current_player)
     end
 
     winner = PLAYERS[self.board.winner]
     puts "Checkmate! #{winner} wins."
+  end
+
+  def save_game
+    puts "Enter a filename:"
+    filename = gets.chomp
+    File.write("./saves/#{filename}.yaml", self.to_yaml)
   end
 
   private
@@ -79,10 +92,10 @@ class HumanPlayer
     @color = color
   end
 
-  def play_turn
-
-    move = gets.chomp.split(",").map(&:strip)
-    raise NotationError unless move.length == 2
+  def parse_input(move)
+    unless move.length == 2
+      raise InputError.new "Please use standard chess notation"
+    end
 
     start_position = convert_position(move[0])
     end_position = convert_position(move[1])
@@ -92,15 +105,26 @@ class HumanPlayer
 
   def convert_position(notation)
     x = LETTERS.find_index(notation[0].downcase)
-    raise NotationError if x.nil?
+    raise InputError.new "Please use standard chess notation" if x.nil?
 
     begin
       y = 8 - Integer(notation[1])
     rescue ArgumentError
-      raise NotationError
+      raise InputError.new "Please use standard chess notation"
     end
 
     [x, y]
   end
 end
 
+if __FILE__ == $PROGRAM_NAME
+  if ARGV.length > 0
+    filename = ARGV.shift
+    saved_game = File.read(filename)
+    game = YAML::load(saved_game)
+  else
+    game = Game.new
+  end
+
+  game.play
+end
