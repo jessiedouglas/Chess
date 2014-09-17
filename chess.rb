@@ -1,24 +1,20 @@
 class Piece
-  attr_accessor :board, :color
-
-  #change later
-  def inspect
-    self.class.to_s[0]
-  end
+  attr_reader :board, :color, :position
 
   def initialize(position, board, color)
-    self.position = position
     @board = board
     @color = color
-  end
-
-  def position
-    @position
+    self.position = position
   end
 
   def position=(position)
     @position = position
     board[position] = self
+  end
+
+  def dup(board = nil)
+    raise "hell" if board.nil?
+    self.class.new(self.position.dup, board, self.color)
   end
 
   def moves

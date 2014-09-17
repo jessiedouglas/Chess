@@ -6,8 +6,6 @@ end
 class EndPositionError < StandardError
 end
 
-class InCheckError < StandardError
-end
 
 class Board
 
@@ -19,6 +17,13 @@ class Board
     middle_horizontal: "  ┠───┼───┼───┼───┼───┼───┼───┼───┨  ",
     bottom: "  ┗━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┛  "
   }
+
+  def initialize(populate = true)
+    @grid = Array.new(8) { Array.new(8) }
+
+    populate_new_board if populate
+  end
+
   def [](position)
     col, row = position
     @grid[row][col]
@@ -35,24 +40,8 @@ class Board
   end
 
   def board_dup # build that
-    duped_board = Board.new
-    grid_dup = []
-
-    @grid.each do |row|
-      row_dup = row.map do |piece|
-        if piece.nil?
-          piece
-        else
-          pos_dup = piece.position.dup
-          piece_dup = piece.class.new(pos_dup, duped_board, piece.color)
-        end
-      end
-
-      grid_dup << row_dup
-    end
-
-    duped_board.populate_board(grid_dup)
-
+    duped_board = Board.new(false)
+    @grid.flatten.compact.each { |piece| piece.dup(duped_board) }
     duped_board
   end
 
@@ -98,10 +87,10 @@ class Board
     end
 
     unless piece.valid_moves.include?(end_pos)
-      raise InCheckError.new
+      raise EndPositionError.new
     end
 
-    piece.position = end_pos
+    move!(start, end_pos)
 
     nil
   end
@@ -117,13 +106,14 @@ class Board
     end
 
     piece.position = end_pos
+    self[start] = nil
 
     nil
   end
 
   def populate_board(grid = nil)
     if grid.nil?
-      @grid = Array.new(8) { Array.new(8) }
+      # @grid = Array.new(8) { Array.new(8) }
       populate_new_board
     else
       @grid = grid
