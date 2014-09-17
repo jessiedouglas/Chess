@@ -11,6 +11,14 @@ end
 
 class Board
 
+  UNICODE_BOX = {
+    letters: "    a   b   c   d   e   f   g   h    ",
+    top: "  ┏━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┓  ",
+    thick_vertical: " ┃ ",
+    thin_vertical: " │ ",
+    middle_horizontal: "  ┠───┼───┼───┼───┼───┼───┼───┼───┨  ",
+    bottom: "  ┗━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┛  "
+  }
   def [](position)
     col, row = position
     @grid[row][col]
@@ -138,22 +146,32 @@ class Board
     nil
   end
 
-  def display
-    puts "   #{('a'..'h').to_a.join(" ")}"
+
+  def to_s
+    lines = []
+
+    lines << UNICODE_BOX[:letters]
+    lines << UNICODE_BOX[:top]
+
     @grid.each_with_index do |row, i|
-      print "#{8 - i}||"
-      row.each do |tile|
-        if tile.nil?
-          print "__"
-        else
-          print "#{tile.unicode} "
-        end
+
+      line = "#{8 - i}" + UNICODE_BOX[:thick_vertical]
+
+      row.each do |piece|
+        square = piece.nil? ? " " : piece.unicode
+        line += square + UNICODE_BOX[:thin_vertical]
       end
 
-      print "||#{8 - i}\n"
+      3.times { line.chop! } # remove extra :thin_vertical
+      lines << line + UNICODE_BOX[:thick_vertical] + "#{8 - i}"
+      lines << UNICODE_BOX[:middle_horizontal]
     end
-    puts "   #{('a'..'h').to_a.join(" ")}"
 
-    nil
+    lines.pop # remove extra :middle_horizontal
+
+    lines << UNICODE_BOX[:bottom]
+    lines << UNICODE_BOX[:letters]
+
+    lines.join("\n")
   end
 end
