@@ -27,6 +27,22 @@ class Piece
     possible_moves = check_color(possible_moves)
   end
 
+  def move_into_check?(position)
+    #returns true if this move puts us in check
+    board_dup = self.board.board_dup
+
+    board_dup.move!(self.position, position)
+    board_dup.in_check?(self.color)
+  end
+
+  def valid_moves
+    valids = self.moves.select do |move|
+      !move_into_check?(move)
+    end
+
+    valids
+  end
+
   private
   def check_on_board(possible_moves)
     result = possible_moves.select do |move|
@@ -44,6 +60,7 @@ class Piece
 
     result
   end
+
 end
 
 class SlidingPiece < Piece
