@@ -39,7 +39,7 @@ class Game
             save_game
             puts "Game saved. Enter next move."
           when "quit"
-            #figure out
+            abort
           else
             raise InputError.new "That is not a valid option, try again."
           end
