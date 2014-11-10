@@ -27,4 +27,4 @@ When asked for a move, type in your move in standard chess notation, with the cu
 desired position of the piece, separated by commas (i.e. "a2,c3")
 
 
-Collaborators: Matt Kevins (github.com/mkevins)
+Collaborators: [Matt Kevins](http://github.com/mkevins)
