@@ -25,3 +25,6 @@ Not currently supported: castling, en passant, pawn promotion
 
 When asked for a move, type in your move in standard chess notation, with the current position of the piece followed by the 
 desired position of the piece, separated by commas (i.e. "a2,c3")
+
+
+Collaborators: Matt Kevins (github.com/mkevins)
